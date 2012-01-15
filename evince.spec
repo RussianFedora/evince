@@ -13,7 +13,6 @@ License:	GPLv2+ and GFDL
 Group:		Applications/Publishing
 URL:		http://projects.gnome.org/evince/
 Source0:	http://download.gnome.org/sources/%{name}/2.28/%{name}-%{version}.tar.bz2
-Obsoletes:	evince-djvu <= 2.28.2
 
 # https://bugzilla.gnome.org/show_bug.cgi?id=596888
 Patch1:		0001-Provide-some-indication-that-search-is-not-available.patch
