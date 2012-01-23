@@ -1,10 +1,12 @@
+%define _unpackaged_files_terminate_build 0
+
 %define poppler_version 0.11.0
 %define glib2_version 2.18.0
 %define gtk2_version 2.14.0
 %define dbus_version 0.70
 %define theme_version 2.17.1
 
-Name:		evince
+Name:		evince-djvu
 Version:	2.28.2
 Release:	14%{?dist}.1.R
 Summary:	Document viewer
@@ -12,7 +14,7 @@ Summary:	Document viewer
 License:	GPLv2+ and GFDL
 Group:		Applications/Publishing
 URL:		http://projects.gnome.org/evince/
-Source0:	http://download.gnome.org/sources/%{name}/2.28/%{name}-%{version}.tar.bz2
+Source0:	http://download.gnome.org/sources/evince/2.28/evince-%{version}.tar.bz2
 
 # https://bugzilla.gnome.org/show_bug.cgi?id=596888
 Patch1:		0001-Provide-some-indication-that-search-is-not-available.patch
@@ -80,10 +82,8 @@ Requires: GConf2
 
 Requires(pre): GConf2
 Requires(post): GConf2
-Requires(post): scrollkeeper
 Requires(preun): GConf2
-Requires(postun): scrollkeeper
-Requires: %{name}-libs = %{version}-%{release}
+Requires: evince = %{version}
 
 %description
 Evince is simple multi-page document viewer. It can display and print
@@ -96,43 +96,8 @@ Support for other document formats such as DVI can be added by installing
 additional backends.
 
 
-%package libs
-Summary: Libraries for the evince document viewer
-Group: System Environment/Libraries
-
-%description libs
-This package contains shared libraries needed for evince 
-
-
-%package devel
-Summary: Support for developing backends for the evince document viewer
-Group: Development/Libraries
-Requires: %{name}-libs = %{version}-%{release}
-
-%description devel
-This package contains libraries and header files needed for evince
-backend development.
-
-
-%package dvi
-Summary: Evince backend for dvi files
-Group: Applications/Publishing
-Requires: %{name}-libs = %{version}-%{release}
-
-%description dvi
-This package contains a backend to let evince display dvi files.
-
-%package djvu
-Summary: Evince backend for djvu files
-Group: Applications/Publishing
-Requires: %{name}-libs = %{version}-%{release}
-
-%description djvu
-This package contains a backend to let evince display djvu files.
-
-
 %prep
-%setup -q
+%setup -q -n evince-%{version}
 %patch1 -p1 -b .search-not-available
 %patch2 -p0 -b .thumbnail-allocation
 %patch3 -p1 -b .dir-prefix
@@ -188,116 +153,31 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 if [ "$1" -gt 1 ]; then
 	export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
-	gconftool-2 --makefile-uninstall-rule \
-		%{_sysconfdir}/gconf/schemas/evince.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer-comics.schemas \
-			>/dev/null || :
-        if [ -f %{_sysconfdir}/gconf/schemas/evince-thumbnailer-djvu.schemas ]; then
                 gconftool-2 --makefile-uninstall-rule \
                         %{_sysconfdir}/gconf/schemas/evince-thumbnailer-djvu.schemas \
                         >/dev/null || :
-        fi
-	if [ -f %{_sysconfdir}/gconf/schemas/evince-thumbnailer-dvi.schemas ]; then
-		gconftool-2 --makefile-uninstall-rule \
-			%{_sysconfdir}/gconf/schemas/evince-thumbnailer-dvi.schemas \
-			>/dev/null || :
-	fi
 fi
 
 
 %post
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-install-rule \
-	%{_sysconfdir}/gconf/schemas/evince.schemas \
-	%{_sysconfdir}/gconf/schemas/evince-thumbnailer.schemas \
-	%{_sysconfdir}/gconf/schemas/evince-thumbnailer-ps.schemas \
-	%{_sysconfdir}/gconf/schemas/evince-thumbnailer-comics.schemas \
         %{_sysconfdir}/gconf/schemas/evince-thumbnailer-djvu.schemas \
-	%{_sysconfdir}/gconf/schemas/evince-thumbnailer-dvi.schemas \
 		>/dev/null || :
-
-update-desktop-database &> /dev/null ||:
-scrollkeeper-update -q -o %{_datadir}/omf/%{name} || :
-
-touch --no-create %{_datadir}/icons/hicolor
-if [ -x /usr/bin/gtk-update-icon-cache ]; then
-  /usr/bin/gtk-update-icon-cache -q %{_datadir}/icons/hicolor;
-fi
-
-%post libs -p /sbin/ldconfig
 
 %preun
 if [ "$1" -eq 0 ]; then
 	export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 	gconftool-2 --makefile-uninstall-rule \
-		%{_sysconfdir}/gconf/schemas/evince.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer-ps.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer-comics.schemas \
                 %{_sysconfdir}/gconf/schemas/evince-thumbnailer-djvu.schemas \
-		%{_sysconfdir}/gconf/schemas/evince-thumbnailer-dvi.schemas \
 			>/dev/null || :
 fi
 
 
-%postun
-update-desktop-database &> /dev/null ||:
-scrollkeeper-update -q || :
-
-touch --no-create %{_datadir}/icons/hicolor
-if [ -x /usr/bin/gtk-update-icon-cache ]; then
-  /usr/bin/gtk-update-icon-cache -q %{_datadir}/icons/hicolor;
-fi
-
-%postun libs -p /sbin/ldconfig
-
 %files -f evince.lang
 %defattr(-,root,root,-)
 %doc README COPYING NEWS AUTHORS
-%{_bindir}/*
-%{_libdir}/nautilus/extensions-2.0/libevince-properties-page.so
-%{_datadir}/%{name}/
-%{_datadir}/applications/%{name}.desktop
-%{_sysconfdir}/gconf/schemas/*.schemas
-%{_datadir}/icons/hicolor/*/apps/evince.*
-%{_mandir}/man1/evince.1.gz
-
-%files libs
-%defattr(-,root,root,-)
-%{_libdir}/libevview.so.*
-%{_libdir}/libevdocument.so.*
-%dir %{_libdir}/evince
-%dir %{_libdir}/evince/1
-%dir %{_libdir}/evince/1/backends
-%{_libdir}/evince/1/backends/libpdfdocument.so
-%{_libdir}/evince/1/backends/pdfdocument.evince-backend
-%{_libdir}/evince/1/backends/libpsdocument.so
-%{_libdir}/evince/1/backends/psdocument.evince-backend
-%{_libdir}/evince/1/backends/libtiffdocument.so
-%{_libdir}/evince/1/backends/tiffdocument.evince-backend
-%{_libdir}/evince/1/backends/libcomicsdocument.so
-%{_libdir}/evince/1/backends/comicsdocument.evince-backend
-
-%files devel
-%defattr(-,root,root,-)
-%{_datadir}/gtk-doc/html/evince/
-%{_datadir}/gtk-doc/html/libevdocument/
-%{_datadir}/gtk-doc/html/libevview/
-%dir %{_includedir}/evince
-%{_includedir}/evince/2.25
-%{_libdir}/libevview.so
-%{_libdir}/libevdocument.so
-%{_libdir}/pkgconfig/evince-view-2.25.pc
-%{_libdir}/pkgconfig/evince-document-2.25.pc
-
-%files dvi
-%defattr(-,root,root,-)
-%{_libdir}/evince/1/backends/libdvidocument.so*
-%{_libdir}/evince/1/backends/dvidocument.evince-backend
-
-%files djvu
-%defattr(-,root,root,-)
+%{_sysconfdir}/gconf/schemas/evince-thumbnailer-djvu.schemas
 %{_libdir}/evince/1/backends/libdjvudocument.so
 %{_libdir}/evince/1/backends/djvudocument.evince-backend
 
