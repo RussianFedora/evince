@@ -6,10 +6,10 @@
 %define dbus_version 0.70
 %define theme_version 2.17.1
 
-Name:		evince-djvu
+Name:		evince-djvu-backend
 Version:	2.28.2
 Release:	14%{?dist}.2.R
-Summary:	Document viewer
+Summary:	Evince backend for djvu files
 
 License:	GPLv2+ and GFDL
 Group:		Applications/Publishing
@@ -86,15 +86,7 @@ Requires(preun): GConf2
 Requires: evince-libs = %{version}
 
 %description
-Evince is simple multi-page document viewer. It can display and print
-Portable Document Format (PDF), PostScript (PS) and Encapsulated PostScript
-(EPS) files. When supported by the document format, evince allows searching
-for text, copying text to the clipboard, hypertext navigation,
-table-of-contents bookmarks and editing of forms.
-
-Support for other document formats such as DVI can be added by installing
-additional backends.
-
+This package contains a backend to let evince display djvu files.
 
 %prep
 %setup -q -n evince-%{version}
