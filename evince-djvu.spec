@@ -83,7 +83,7 @@ Requires: GConf2
 Requires(pre): GConf2
 Requires(post): GConf2
 Requires(preun): GConf2
-Requires: evince = %{version}
+Requires: evince-libs = %{version}
 
 %description
 Evince is simple multi-page document viewer. It can display and print
