@@ -8,7 +8,7 @@
 
 Name:		evince-djvu
 Version:	2.28.2
-Release:	14%{?dist}.1.R
+Release:	14%{?dist}.2.R
 Summary:	Document viewer
 
 License:	GPLv2+ and GFDL
@@ -182,6 +182,9 @@ fi
 %{_libdir}/evince/1/backends/djvudocument.evince-backend
 
 %changelog
+* Mon Jan 23 2012 Arkady L. Shane <ashejn@russianfedora.ru> - 2.28.2-14.el6.2.R
+- bump release
+
 * Mon Jan 16 2012 Arkady L. Shane <ashejn@russianfedora.ru> - 2.28.2-14.el6.1.R
 - rebuilt with djvu support
 
